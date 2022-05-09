@@ -1,0 +1,39 @@
+{% extends "template.html" %}
+
+{% block title %} Retrain {% endblock %}
+
+{% block content %}
+
+<nav>
+<p><a href="/">Home</a> | <a href="/api/v1/predictModel">Predictions</a></p>
+</nav>
+
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+    {% for message in messages %}
+        <p>{{ message }}</p>
+    {% endfor %}
+{% endif %}
+{% endwith %}
+
+<h2>Aquí reentrenamos</h2>
+
+
+<form action="/api/v1/retrainModel/" method="post">
+    {{ form.hidden_tag() }}
+    <div>
+        Enter the file to retrain the model:
+    </div>
+
+    <p><div class="file-field"> File:
+        {{ form.file }}
+        {% for error in form.file.errors %}
+        <p class="error">{{ error }}</p>
+        {% endfor %}
+    </div></p>
+
+    <p><div class="file-field">{{ form.submit }}</div></p>
+
+</form>
+
+{% endblock %}
