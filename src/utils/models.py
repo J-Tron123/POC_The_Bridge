@@ -1,42 +1,115 @@
-import numpy as np, pymysql, pickle
+import numpy as np, pandas as pd, sqlite3, pickle
+from pmdarima.arima import auto_arima
+from sklearn.metrics import mean_absolute_percentage_error
 
-choices = [(None, "---Select an option---"), (7, "Week"), (28, "February"), 
-(29, "February in leap year"), (30, "30 days month"), (31, "31 days month")]
 
-class DBController():
-    def __init__(self, database_route):
-        self.database_route = database_route
-
-    def querySQL(self, query, parameters=[]):
-        con = pymysql.connect(self.database_route)
-        cur = con.cursor()
-        cur.execute(query, parameters)
-
-        keys = []
-        for item in cur.description:
-            keys.append(item[0])
-
-        responses = []
-        for response in cur.fetchall():
-            ix_clave = 0
-            d = {}
-            for column in keys:
-                d[column] = response[ix_clave]
-                ix_clave += 1
-            responses.append(d)
-
-        con.close()
-        return responses
-    
-    def changeSQL(self, query, parameters):
-        con = pymysql.connect(self.database_route)
-        cur = con.cursor()
-        cur.execute(query, parameters) 
-        con.commit()
-        con.close()
+choices = [(None, "---Selecciona una opción---"), (7, "Semana"), (30, "Mes de 30 días"), 
+(31, "Mes de 31 días"), (28, "Mes de 28 días"), (29, "Mes de 29 días")]
 
 def predictions(period, route):
-    model = pickle.load(open(route,'rb'))
-    predicciones = model.predict(period)
-    inversed_predicciones = np.expm1(predicciones)
-    return np.round(inversed_predicciones, 0)
+
+    period = int(period)
+
+    if period in [7,28,29,30,31]:
+        model = pickle.load(open(route, "rb"))
+        predicciones = model.predict(period)
+        inversed_predicciones = np.expm1(predicciones)
+        print(model)
+        return np.round(inversed_predicciones, 0)
+        
+    else:
+        return ("Debes ingresar la cantidad de días que tiene un mes o una semana") 
+
+
+def modification_data(data):
+    """Modificar dataFrame ingresado, agregar columnas de day, month, year, cambiar Formato columna Date
+    
+    Argumentos:
+        - df (DataFrame) : DataFrame a tranformar
+        
+    Retorno:
+        - df (DataFrame)
+    """
+    data = pd.read_csv(data)
+
+    data[["day", "month", "year"]] = data["Date"].str.split("/", expand=True)
+    data["year"] = data["year"].astype(int)
+    data["month"] = data["month"].astype(int)
+    data["day"] = data["day"].astype(int)
+    data["Date"] = pd.to_datetime(data[["day", "month", "year"]]).astype(str)
+    return data  
+
+
+def create_db_csv(data, route):
+    """Crear base da datos, e ingresar los registros del DataFrame a la base de datos creada
+    
+    Argumentos:
+        - df (DataFrame) : DataFrame a tranformar
+        
+    Retorno:
+        -  (string)
+    """
+    
+    connection = sqlite3.connect(route)
+    crsr = connection.cursor()
+    
+    create_table = """
+    CREATE TABLE USERS (
+    Date DATE,
+    Users int(5),
+    day int(5),
+    month int(5),
+    year int(5)
+    );
+    """
+    eliminate_table = """
+        DROP TABLE USERS;
+        """
+    try:        
+        crsr.execute(create_table)
+    except:        
+        crsr.execute(eliminate_table)
+        crsr.execute(create_table)
+        
+    for index, row in data.iterrows():
+        crsr.execute("""INSERT INTO USERS (Date, Users, day, month, year) values(?,?,?,?,?)""", (row.Date, row.Users, row.day, row.month, row.year))
+    
+    connection.commit()
+    connection.close()
+    return "Base de Datos Creada"
+
+def modelo_entrenar(route_data_base, route_model):
+    """Entrenar model, modelo Autoarima
+            
+    Retorno:
+        -  (string)
+    """
+    connection = sqlite3.connect(route_data_base)
+    cursor = connection.cursor()
+    data = "SELECT * FROM USERS" #query
+    result = cursor.execute(data).fetchall()
+    names = [description[0] for description in cursor.description]
+    connection.close()
+    df = pd.DataFrame(result,columns=names)
+    df["Users"] = np.log1p(df["Users"])
+    train = df[["Users"]][:-30]
+    test = df[["Users"]][-30:]
+    
+    model = auto_arima(
+    train,
+    start_p=1,
+    start_q=1,
+    max_d=3,
+    max_p=5,
+    max_q=5,
+    stationary=False,
+    trace=True,
+    random_state=42,
+    n_jobs=-1,
+    n_fits=50
+    )
+    
+    predicciones = model.predict(len(test))
+    print("MAPE:", mean_absolute_percentage_error(test.values, predicciones))
+    pickle.dump(model, open(route_model, "wb"))
+    return "Modelo Entrenado"

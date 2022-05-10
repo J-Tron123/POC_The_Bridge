@@ -1,11 +1,11 @@
 {% extends "template.html" %}
 
-{% block title %} Database Update {% endblock %}
+{% block title %} Actualización de base de datos {% endblock %}
 
 {% block content %}
 
 <nav>
-<p><a href="/">Home</a> | <a href="/api/v1/predictModel">Predictions</a></p>
+<p><a href="/">Home</a> | <a href="/api/v1/predictModel">Predicciones</a> | <a href="/api/v1/retrainModel">Reentrenamiento</a></p>
 </nav>
 
 {% with messages = get_flashed_messages() %}
@@ -16,16 +16,16 @@
 {% endif %}
 {% endwith %}
 
-<h2>Aquí reentrenamos</h2>
+<h2>Actualización de la base de datos</h2>
 
 
 <form action="/api/v1/refreshDatabase/" method="post">
     {{ form.hidden_tag() }}
     <div>
-        Enter the file to retrain the model:
+        Sube un archivo para actualizar la base de datos:
     </div>
 
-    <p><div class="file-field"> File:
+    <p><div class="file-field"> Archivo:
         {{ form.file }}
         {% for error in form.file.errors %}
         <p class="error">{{ error }}</p>
