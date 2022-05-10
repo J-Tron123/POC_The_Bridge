@@ -1,4 +1,7 @@
-import pymysql
+import numpy as np, pymysql, pickle
+
+choices = [(None, "---Select an option---"), (7, "Week"), (28, "February"), 
+(29, "February in leap year"), (30, "30 days month"), (31, "31 days month")]
 
 class DBController():
     def __init__(self, database_route):
@@ -31,3 +34,9 @@ class DBController():
         cur.execute(query, parameters) 
         con.commit()
         con.close()
+
+def predictions(period, route):
+    model = pickle.load(open(route,'rb'))
+    predicciones = model.predict(period)
+    inversed_predicciones = np.expm1(predicciones)
+    return np.round(inversed_predicciones, 0)

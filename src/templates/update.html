@@ -1,6 +1,6 @@
 {% extends "template.html" %}
 
-{% block title %} Retrain {% endblock %}
+{% block title %} Database Update {% endblock %}
 
 {% block content %}
 
@@ -19,7 +19,7 @@
 <h2>Aquí reentrenamos</h2>
 
 
-<form action="/api/v1/retrainModel/" method="post">
+<form action="/api/v1/refreshDatabase/" method="post">
     {{ form.hidden_tag() }}
     <div>
         Enter the file to retrain the model:
@@ -32,7 +32,7 @@
         {% endfor %}
     </div></p>
 
-    <p><div class="file-field">{{ form.submit }}</div></p>
+    <p><div class="form-field">{{ form.submit }}</div></p>
 
 </form>
 

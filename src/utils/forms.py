@@ -1,10 +1,11 @@
 from flask_wtf import FlaskForm
-from wtforms import DateField, FileField, SubmitField
+from wtforms import SelectField, FileField, SubmitField
 from wtforms.validators import DataRequired, regexp
+from utils.models import choices
 
 
 class ValidateDate(FlaskForm):
-    date = DateField("Date", validators=[DataRequired(message="You must enter a Date")])
+    period = SelectField("Moneda de Destino",  choices=choices)
     submit = SubmitField("Submit")
 
 class ValidateFile(FlaskForm):
