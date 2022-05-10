@@ -1,0 +1,28 @@
+{% extends "template.html" %}
+
+{% block title %} Home {% endblock %}
+
+{% block content %}
+
+<nav>
+<p><a href="/api/v1/predictModel">Predictions</a> | <a href="/api/v1/refreshDatabase">Retraining</a></p>
+</nav>
+
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+    {% for message in messages %}
+        <p class="error">{{ message }}</p>
+    {% endfor %}
+{% endif %}
+{% endwith %}
+
+<h2>Bienvenido a nuestra POC para el proyecto del módulo de Data Engineering del Bootcamp de Data Science de The Bridge Feb-2022</h2>
+
+<p>
+    Esta API puedes usarla de dos maneras, a través de esta interfaz o atacando los endpoints correspondientes
+    usando las URL's respectivas, en este apartado podrás ver las URL's y el formato necesario para hacer la consulta.
+</p>
+
+
+
+{% endblock %}

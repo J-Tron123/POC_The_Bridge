@@ -1,0 +1,36 @@
+{% extends "template.html" %}
+
+{% block title %} Predict {% endblock %}
+
+{% block content %}
+
+<nav>
+<p><a href="/">Home</a> | <a href="/api/v1/refreshDatabase">Retraining</a></p>
+</nav>
+
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+    {% for message in messages %}
+        <p class="error">{{ message }}</p>
+    {% endfor %}
+{% endif %}
+{% endwith %}
+
+<h2>Aquí predecimos</h2>
+
+
+<form action="/api/v1/predictModel/" method="post">
+    {{ form.hidden_tag() }}
+    <p><div class="form-field"> Period of time to predict:
+        {{ form.period }}
+        {% for error in form.period.errors %}
+        <p class="error">{{ error }}</p>
+        {% endfor %}
+    </div></p>
+
+    <p><div class="form-field">{{ form.submit }}</div></p>
+</form>
+
+
+
+{% endblock %}
