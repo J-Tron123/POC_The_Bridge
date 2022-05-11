@@ -1,11 +1,11 @@
 {% extends "template.html" %}
 
-{% block title %} Predict {% endblock %}
+{% block title %} Predicciones {% endblock %}
 
 {% block content %}
 
 <nav>
-<p><a href="/">Home</a> | <a href="/api/v1/refreshDatabase">Retraining</a></p>
+<p><a href="/">Home</a> | <a href="/api/v1/refreshDatabase">Actualización de base de datos</a> | <a href="/api/v1/retrainModel">Reentrenamiento</a></p>
 </nav>
 
 {% with messages = get_flashed_messages() %}
@@ -16,12 +16,12 @@
 {% endif %}
 {% endwith %}
 
-<h2>Aquí predecimos</h2>
+<h2>Predicciones</h2>
 
 
 <form action="/api/v1/predictModel/" method="post">
     {{ form.hidden_tag() }}
-    <p><div class="form-field"> Period of time to predict:
+    <p><div class="form-field"> Periodo de tiempo a predecir:
         {{ form.period }}
         {% for error in form.period.errors %}
         <p class="error">{{ error }}</p>

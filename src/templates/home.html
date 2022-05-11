@@ -5,7 +5,7 @@
 {% block content %}
 
 <nav>
-<p><a href="/api/v1/predictModel">Predictions</a> | <a href="/api/v1/refreshDatabase">Retraining</a></p>
+<p><a href="/api/v1/predictModel">Predicciones</a> | <a href="/api/v1/refreshDatabase">Actualización de base de datos</a> | <a href="/api/v1/retrainModel">Reentrenamiento</a></p>
 </nav>
 
 {% with messages = get_flashed_messages() %}
@@ -23,6 +23,13 @@
     usando las URL's respectivas, en este apartado podrás ver las URL's y el formato necesario para hacer la consulta.
 </p>
 
+<p>
+    Puedes usar esta interfaz gráfica para hacer las estimaciones de solicitudes de información para bootcamps,
+    actualizar la base de datos y reentrenar el predictor con los datos nuevos de esta
+</p>
 
+<p>
+    También puedes hacer solicitudes mediante URL con los siguientes endpoints:
+</p>
 
 {% endblock %}
