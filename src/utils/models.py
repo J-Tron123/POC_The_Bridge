@@ -1,4 +1,4 @@
-import numpy as np, pandas as pd, sqlite3, pickle
+import numpy as np, pandas as pd, pymysql, pickle
 from pmdarima.arima import auto_arima
 from sklearn.metrics import mean_absolute_percentage_error
 
@@ -37,10 +37,11 @@ def modification_data(data):
     data["month"] = data["month"].astype(int)
     data["day"] = data["day"].astype(int)
     data["Date"] = pd.to_datetime(data[["day", "month", "year"]]).astype(str)
+    print(data)
     return data  
 
 
-def create_db_csv(data, route):
+def create_db_csv(data, host, password, user):
     """Crear base da datos, e ingresar los registros del DataFrame a la base de datos creada
     
     Argumentos:
@@ -50,44 +51,43 @@ def create_db_csv(data, route):
         -  (string)
     """
     
-    connection = sqlite3.connect(route)
+    connection = pymysql.connect(host=host, password=password, user=user, cursorclass = pymysql.cursors.DictCursor)
     crsr = connection.cursor()
-    
-    create_table = """
-    CREATE TABLE USERS (
-    Date DATE,
-    Users int(5),
-    day int(5),
-    month int(5),
-    year int(5)
-    );
+    use_db = """USE DB_POC"""
+    create_table = """CREATE TABLE USERS (Date VARCHAR(12), Users int(5), day int(2), month int(2), year int(4));
     """
-    eliminate_table = """
-        DROP TABLE USERS;
-        """
-    try:        
+    eliminate_table = """DROP TABLE USERS;"""
+    try:
+        crsr.execute(use_db)        
         crsr.execute(create_table)
-    except:        
+    except pymysql.Error as e:
+        print(e)
+        crsr.execute(use_db)        
         crsr.execute(eliminate_table)
         crsr.execute(create_table)
         
     for index, row in data.iterrows():
-        crsr.execute("""INSERT INTO USERS (Date, Users, day, month, year) values(?,?,?,?,?)""", (row.Date, row.Users, row.day, row.month, row.year))
+        crsr.execute(use_db)
+        crsr.execute(f"""INSERT INTO USERS (Date, Users, day, month, year) values({row.Date}, {row.Users}, {row.day}, {row.month}, {row.year})""")
     
     connection.commit()
     connection.close()
     return "Base de Datos Creada"
 
-def modelo_entrenar(route_data_base, route_model):
+def modelo_entrenar(route_model, host, password, user):
     """Entrenar model, modelo Autoarima
             
     Retorno:
         -  (string)
     """
-    connection = sqlite3.connect(route_data_base)
+    connection = pymysql.connect(host=host, password=password, user=user, cursorclass = pymysql.cursors.DictCursor)
     cursor = connection.cursor()
-    data = "SELECT * FROM USERS" #query
-    result = cursor.execute(data).fetchall()
+    use_db = """USE DB_POC"""
+    data = """SELECT * FROM USERS""" #query
+    cursor.execute(use_db)
+    cursor.execute(data)
+    result = cursor.fetchall()
+    print(result)
     names = [description[0] for description in cursor.description]
     connection.close()
     df = pd.DataFrame(result,columns=names)

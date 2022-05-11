@@ -4,7 +4,7 @@ from utils.forms import ValidateDate, ValidateFile, SubmitRetrain
 from utils.models import predictions, modification_data, create_db_csv, modelo_entrenar
 from flask.helpers import flash, url_for
 from werkzeug.utils import redirect
-from config import DATA_BASE, MODEL
+from config import DATA_BASE, MODEL, USER, PASSWORD, HOST, ENDPOINT
 import pymysql, csv, os
 
 # Setting path init
@@ -75,8 +75,7 @@ def refresh_database():
                                 csv_file = csv.reader(file)
                                 for row in csv_file:
                                     data.append(row)
-                            
-                            create_db_csv(modification_data(data), DATA_BASE)
+                        create_db_csv(modification_data("data/users_web.csv"), HOST, PASSWORD, USER)
                         flash("La base de datos se ha actualizado correctamente")
                         return redirect(url_for("home"))
 
@@ -105,7 +104,7 @@ def retrain_model():
         if form.validate:
             if form.data["submit"] == True:
                 try:
-                    modelo_entrenar(DATA_BASE, MODEL)
+                    modelo_entrenar(MODEL, HOST, PASSWORD, USER)
                     flash("El modelo se ha actualizado correctamente")
                     return redirect(url_for("home"))
 
